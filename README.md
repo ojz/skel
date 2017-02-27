@@ -21,4 +21,4 @@ gong ~/Projects/todoApp -name todo
 
 ## Todo
 
-* Support for casing would be nice (lower, UPPER, Capital, CamelCase, lowerCamel)
+* allow source to be a file

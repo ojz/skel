@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"regexp"
 )
 
 var source string
@@ -19,15 +20,6 @@ func init() {
 	flag.StringVar(&dest, "dest", "", "Where to save the generated files.")
 	flag.StringVar(&nonce, "nonce", "", "The word which should be replaced (defaults to the basename of the source).")
 	flag.StringVar(&name, "name", "", "The name of the new project (defaults to the basename of the destination).")
-}
-
-func replace(old string) string {
-	// @TODO it would be nice if we could support casing:
-	// - find (case insensitive) matches of nonce
-	// - determine casing (lower, UPPER, Capital, CamelCase, lowerCamel)
-	// - replace by the corresponding casing of name
-	// (+ setup casings of name in advance)
-	return strings.Replace(old, nonce, name, -1)
 }
 
 func main() {
@@ -81,6 +73,30 @@ func copydir(source string, dest string) {
 
 func copyfile(infile string, outfile string) {
 	in, _ := ioutil.ReadFile(infile)
+
 	out := replace(string(in))
+
 	ioutil.WriteFile(outfile, []byte(out), os.ModePerm)
+}
+
+func replace(in string) string {
+	re := regexp.MustCompile("(?i)" + nonce)
+
+	cb := func(tpl string) string {
+		if strings.ToLower(tpl) == tpl {
+			return strings.ToLower(name)
+		}
+
+		if strings.ToUpper(tpl) == tpl {
+			return strings.ToUpper(name)
+		}
+
+		if strings.Title(tpl) == tpl {
+			return strings.Title(name)
+		}
+
+		return name
+	}
+
+	return re.ReplaceAllStringFunc(in, cb)
 }
