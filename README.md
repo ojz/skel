@@ -18,7 +18,3 @@ mkdir -p ~/.skel/acme-go-angularjs
 alias gong="skel -nonce seedproject -source ~/.skel/acme-go-angularjs -dest"
 gong ~/Projects/todoApp -name todo
 ```
-
-## Todo
-
-* allow source to be a file
