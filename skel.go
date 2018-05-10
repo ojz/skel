@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 	"path"
-	"strings"
 	"regexp"
+	"strings"
 )
 
 var source string
@@ -38,17 +38,29 @@ func main() {
 		name = path.Base(dest)
 	}
 
-	copydir(source, dest)
+	s, err := os.Stat(source)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if s.IsDir() {
+		copydir(source, dest)
+	} else if s.Mode().IsRegular() {
+		copyfile(source, dest)
+	}
 }
 
 func copydir(source string, dest string) {
+	var err error
 
 	// first create the wanted directory:
-	os.Mkdir(dest, os.ModePerm)
+	err = os.Mkdir(dest, os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// copy the files in it
 	var fp *os.File
-	var err error
 
 	fp, err = os.Open(source)
 	if err != nil {
@@ -72,11 +84,17 @@ func copydir(source string, dest string) {
 }
 
 func copyfile(infile string, outfile string) {
-	in, _ := ioutil.ReadFile(infile)
+	in, err := ioutil.ReadFile(infile)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	out := replace(string(in))
 
-	ioutil.WriteFile(outfile, []byte(out), os.ModePerm)
+	err = ioutil.WriteFile(outfile, []byte(out), os.ModePerm)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func replace(in string) string {
